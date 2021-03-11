@@ -1,38 +1,17 @@
 const request = require('request');
-const args    = process.argv.slice(2);
 
-let url = "https://api.thecatapi.com/v1/images/search?breed_ids=";
-const breedName = args[0].slice(0,4).toLowerCase();
+const fetchBreedDescription = (breedName, callback) => {
 
-if (!breedName) {
-  console.log("You need to provide the cat breed name!");
-  return;
-} else {
-  url += breedName;
-}
+  const url = "https://api.thecatapi.com/v1/images/search?breed_ids=" + breedName.slice(0,4).toLowerCase();
 
-const getPage = (url) => {
   request(url, (error, response, body) => {
 
-    if (error) {
-      console.log('Error:', error); // Print the error if one occurred
-      return;
+    if (JSON.parse(body).length === 0) {
+      callback("Breed not found",body);
+    } else {
+      callback(error,JSON.parse(body)[0].breeds[0].description);
     }
-    
-    const data = JSON.parse(body);
-
-    if (data.length === 0) {
-      console.log(`Breed ${breedName} not found.`);
-      return;
-    }
-
-    console.log(data);
-
   });
 };
 
-if (!url) {
-  console.log("This script requires url and filepath/name to work");
-} else {
-  getPage(url);
-}
+module.exports = { fetchBreedDescription };
